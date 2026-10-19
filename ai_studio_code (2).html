@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phòng Thí Nghiệm Hóa Học Pro</title>
+    <!-- Thư viện FontAwesome để lấy Icon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --neon-blue: #38bdf8;
+            --neon-green: #4ade80;
+            --neon-red: #f87171;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--neon-blue);
+            border-bottom: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Glassmorphism Panel */
+        .panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Left Panel - Chemicals */
+        .inventory {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .category-title {
+            color: var(--neon-blue);
+            margin: 10px 0;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .chem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+        }
+
+        .chem-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .chem-btn:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+            transform: translateY(-2px);
+        }
+
+        /* Center Panel - Flask */
+        .lab-desk {
+            flex: 2;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* SVG Flask */
+        .flask-container {
+            position: relative;
+            width: 200px;
+            height: 250px;
+            margin: 0 auto;
+        }
+
+        .flask-svg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            z-index: 10;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+            pointer-events: none;
+        }
+
+        .flask-content {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 130px;
+            border-radius: 50%;
+            overflow: hidden;
+            z-index: 5;
+            display: flex;
+            align-items: flex-end;
+            clip-path: polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
+        }
+
+        .liquid {
+            width: 100%;
+            height: 0%;
+            background: transparent;
+            transition: all 0.8s ease;
+            position: relative;
+        }
+
+        /* Animations */
+        @keyframes bubble-rise {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+        }
+
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: bubble-rise 2s infinite ease-in;
+        }
+
+        @keyframes precipitate-fall {
+            0% { transform: translateY(-50px); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(50px); opacity: 0.8; }
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            animation: precipitate-fall 3s infinite linear;
+        }
+
+        @keyframes explode {
+            0% { filter: brightness(1) drop-shadow(0 0 0px red); }
+            10% { filter: brightness(3) drop-shadow(0 0 50px yellow); transform: scale(1.1); }
+            100% { filter: brightness(1) drop-shadow(0 0 0px red); }
+        }
+        .explosion-effect { animation: explode 0.5s ease-out; }
+
+        /* Controls */
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        button.action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-react { background: var(--neon-green); color: #000; box-shadow: 0 0 15px var(--neon-green); }
+        .btn-react:hover { transform: scale(1.05); filter: brightness(1.2); }
+        .btn-clear { background: var(--neon-red); color: #fff; box-shadow: 0 0 15px var(--neon-red); }
+        .btn-clear:hover { transform: scale(1.05); filter: brightness(1.2); }
+
+        /* Right Panel - Info */
+        .log-panel {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mixture-info {
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+
+        .reaction-board {
+            flex: 1;
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .eq-success { color: var(--neon-green); font-weight: bold; margin-top: 5px; }
+        .eq-neutral { color: var(--neon-blue); }
+        .eq-warning { color: #facc15; }
+        
+        /* Scrollbar custom */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <i class="fas fa-flask"></i> CHEMISTRY LAB V2.0 - ALGORITHM ENGINE
+    </header>
+
+    <div class="main-container">
+        <!-- Tủ hóa chất (Bên trái) -->
+        <div class="panel inventory" id="inventory">
+            <!-- Sẽ được tạo tự động bằng Javascript -->
+        </div>
+
+        <!-- Bàn thí nghiệm (Ở giữa) -->
+        <div class="panel lab-desk">
+            <h3 style="margin-top:0; color: var(--neon-blue);"><i class="fas fa-microscope"></i> Khu Vực Phản Ứng</h3>
+            
+            <div class="flask-container" id="flask">
+                <!-- Vỏ BÌNH CẦU vẽ bằng SVG -->
+                <svg class="flask-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M 40 10 L 60 10 L 60 40 L 85 95 C 90 105 85 115 70 115 L 30 115 C 15 115 10 105 15 95 L 40 40 Z" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+                    <path d="M 35 10 L 65 10" stroke="rgba(255,255,255,0.8)" stroke-width="3"/>
+                    <!-- Vạch chia thể tích -->
+                    <line x1="50" y1="50" x2="60" y2="50" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+                    <line x1="50" y1="70" x2="65" y2="70" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+                    <line x1="50" y1="90" x2="70" y2="90" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+                </svg>
+
+                <!-- Lõi chứa dung dịch và hiệu ứng -->
+                <div class="flask-content">
+                    <div class="liquid" id="liquid"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="action-btn btn-react" onclick="runReaction()"><i class="fas fa-bolt"></i> Phản Ứng</button>
+                <button class="action-btn btn-clear" onclick="clearFlask()"><i class="fas fa-trash"></i> Rửa Bình</button>
+            </div>
+        </div>
+
+        <!-- Bảng Kết quả (Bên phải) -->
+        <div class="panel log-panel">
+            <div class="mixture-info">
+                <strong><i class="fas fa-vial"></i> Trong bình chứa: </strong> <span id="current-chem" style="color:var(--neon-green)">Trống</span>
+            </div>
+            <div class="reaction-board" id="board">
+                <span style="color:gray">> Khởi động máy gia tốc hạt... OK</span><br>
+                <span style="color:gray">> Thuật toán phân tích Ion... OK</span><br>
+                <span style="color:var(--neon-blue)">> Sẵn sàng nhận hóa chất.</span><br>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATABASE HÓA CHẤT (Phân loại thông minh) ---
+        const DB = {
+            "Kim Loại": {
+                "Na": { name: "Natri", type: "metal", active: 5, color: "#cccccc" },
+                "K":  { name: "Kali", type: "metal", active: 6, color: "#d1d1d1" },
+                "Mg": { name: "Magie", type: "metal", active: 4, color: "#b0b0b0" },
+                "Fe": { name: "Sắt", type: "metal", active: 3, color: "#7a7a7a" },
+                "Cu": { name: "Đồng", type: "metal", active: 1, color: "#b87333" },
+                "Ag": { name: "Bạc", type: "metal", active: 0, color: "#e0e0e0" }
+            },
+            "Axit": {
+                "HCl":   { name: "Axit Clohidric", type: "acid", ions: ["H", "Cl"], color: "rgba(255,255,255,0.2)" },
+                "H2SO4": { name: "Axit Sunfuric", type: "acid", ions: ["H", "SO4"], color: "rgba(255,255,255,0.3)" },
+                "HNO3":  { name: "Axit Nitric", type: "acid", ions: ["H", "NO3"], color: "rgba(255,255,200,0.2)" }
+            },
+            "Bazo": {
+                "NaOH":  { name: "Natri Hidroxit", type: "base", ions: ["Na", "OH"], color: "rgba(255,255,255,0.2)" },
+                "Ba(OH)2":{ name: "Bari Hidroxit", type: "base", ions: ["Ba", "OH"], color: "rgba(255,255,255,0.2)" }
+            },
+            "Muối": {
+                "NaCl":  { name: "Muối Ăn", type: "salt", ions: ["Na", "Cl"], color: "rgba(255,255,255,0.2)" },
+                "AgNO3": { name: "Bạc Nitrat", type: "salt", ions: ["Ag", "NO3"], color: "rgba(255,255,255,0.2)" },
+                "BaCl2": { name: "Bari Clorua", type: "salt", ions: ["Ba", "Cl"], color: "rgba(255,255,255,0.2)" },
+                "CuSO4": { name: "Đồng Sunfat", type: "salt", ions: ["Cu", "SO4"], color: "rgba(56, 189, 248, 0.6)" },
+                "Na2CO3":{ name: "Natri Cacbonat", type: "salt", ions: ["Na", "CO3"], color: "rgba(255,255,255,0.2)" },
+                "CaCO3": { name: "Canxi Cacbonat", type: "salt", ions: ["Ca", "CO3"], color: "rgba(255,255,255,0.6)" }
+            },
+            "Dung Môi & Chỉ Thị": {
+                "H2O": { name: "Nước Cất", type: "water", color: "rgba(255,255,255,0.1)" },
+                "Phenol": { name: "Phenolphthalein", type: "indicator_base", color: "rgba(255,255,255,0.1)" },
+                "QuyTim": { name: "Quỳ Tím", type: "indicator_all", color: "rgba(128,0,128,0.3)" }
+            }
+        };
+
+        // --- 2. BẢNG TÍNH TAN & KẾT TỦA (Tra cứu Ion) ---
+        const precipitates = {
+            "Ag_Cl": { name: "AgCl", color: "white", msg: "Kết tủa trắng Bạc Clorua" },
+            "Ba_SO4": { name: "BaSO4", color: "white", msg: "Kết tủa trắng Bari Sunfat" },
+            "Cu_OH": { name: "Cu(OH)2", color: "blue", msg: "Kết tủa xanh lam Đồng Hidroxit" },
+            "Ca_CO3": { name: "CaCO3", color: "white", msg: "Kết tủa trắng Canxi Cacbonat" },
+            "Ba_CO3": { name: "BaCO3", color: "white", msg: "Kết tủa trắng Bari Cacbonat" },
+            "Ag_SO4": { name: "Ag2SO4", color: "white", msg: "Ít tan (Kết tủa trắng Bạc Sunfat)"}
+        };
+
+        let flask = []; // Mảng chứa các chất đang có trong bình (Tối đa 2)
+
+        // --- 3. KHỞI TẠO GIAO DIỆN ---
+        function initUI() {
+            const inv = document.getElementById('inventory');
+            for(const [category, items] of Object.entries(DB)) {
+                let html = `<div class="category-title">${category}</div><div class="chem-grid">`;
+                for(const [formula, data] of Object.entries(items)) {
+                    html += `<button class="chem-btn" onclick="addChem('${formula}')" title="${data.name}">${formula}</button>`;
+                }
+                html += `</div>`;
+                inv.innerHTML += html;
+            }
+        }
+
+        // Lấy dữ liệu của 1 chất bất kỳ
+        function getChemData(formula) {
+            for(const cat in DB) if(DB[cat][formula]) return DB[cat][formula];
+            return null;
+        }
+
+        // --- 4. THÊM CHẤT VÀO BÌNH ---
+        function addChem(formula) {
+            if(flask.length >= 2) {
+                alert("Bình chứa đã đầy! Vui lòng ấn 'Phản Ứng' hoặc 'Rửa Bình'.");
+                return;
+            }
+            
+            flask.push({ formula: formula, data: getChemData(formula) });
+            
+            // Cập nhật text UI
+            document.getElementById('current-chem').innerText = flask.map(f => f.formula).join(" + ");
+            
+            // Đổ chất lỏng vào bình
+            const liquid = document.getElementById('liquid');
+            liquid.style.height = (flask.length * 40) + "%";
+            
+            // Pha trộn màu sắc (Lấy màu chất mới nhất, nếu là Phenol/Quỳ thì giữ màu nhạt)
+            if(flask.length === 1) liquid.style.background = flask[0].data.color;
+            else {
+                 liquid.style.background = flask[1].data.color;
+            }
+            
+            log(`> Đã thêm [${formula}] vào bình.`, "eq-neutral");
+        }
+
+        // Xóa sạch bình
+        function clearFlask() {
+            flask = [];
+            document.getElementById('current-chem').innerText = "Trống";
+            document.getElementById('liquid').style.height = "0%";
+            document.getElementById('liquid').innerHTML = ""; // Xóa bọt khí/kết tủa
+            document.getElementById('flask').classList.remove('explosion-effect');
+            log("\n=====================");
+            log("> Bình đã được rửa sạch sẽ.", "eq-neutral");
+        }
+
+        // In kết quả ra bảng
+        function log(msg, className="eq-neutral") {
+            const b = document.getElementById('board');
+            b.innerHTML += `<div class="${className}">${msg}</div>`;
+            b.scrollTop = b.scrollHeight; // Tự cuộn xuống dòng mới nhất
+        }
+
+        // --- 5. ĐỘNG CƠ HÓA HỌC DỰA TRÊN THUẬT TOÁN ---
+        function runReaction() {
+            if(flask.length < 2) {
+                log("! Cần ít nhất 2 chất để xảy ra phản ứng trao đổi/oxy hóa.", "eq-warning");
+                return;
+            }
+
+            let c1 = flask[0];
+            let c2 = flask[1];
+            let reacted = false;
+            let liquid = document.getElementById('liquid');
+            liquid.innerHTML = ""; // Xóa bọt khí/kết tủa cũ
+
+            log(`\n▶ Đang phân tích phản ứng: ${c1.formula} + ${c2.formula}...`);
+
+            // TRƯỜNG HỢP 1: KIM LOẠI + NƯỚC (Nổ bục bình)
+            if((c1.data.type === "metal" && c2.data.type === "water") || (c2.data.type === "metal" && c1.data.type === "water")) {
+                let metal = c1.data.type === "metal" ? c1 : c2;
+                if(metal.data.active >= 5) { // Na, K
+                    log(`[CẢNH BÁO] Phản ứng tỏa nhiều nhiệt, sinh khí H2 gây nổ!`, "eq-warning");
+                    log(`2${metal.formula} + 2H2O → 2${metal.formula}OH + H2 ↑`, "eq-success");
+                    createGas();
+                    document.getElementById('flask').classList.add('explosion-effect');
+                    liquid.style.background = "rgba(255,255,255,0.4)";
+                    reacted = true;
+                } else {
+                    log(`${metal.formula} không phản ứng với nước ở nhiệt độ thường.`, "eq-warning");
+                    reacted = true;
+                }
+            }
+
+            // TRƯỜNG HỢP 2: KIM LOẠI + AXIT (Đẩy Hydro)
+            if(!reacted && ((c1.data.type === "metal" && c2.data.type === "acid") || (c2.data.type === "metal" && c1.data.type === "acid"))) {
+                let metal = c1.data.type === "metal" ? c1 : c2;
+                let acid = c1.data.type === "acid" ? c1 : c2;
+                
+                // Trừ HNO3/H2SO4 đặc (Trò chơi này đơn giản hóa)
+                if(metal.data.active >= 2) { 
+                    log(`Kim loại đứng trước H đẩy được Hydro ra khỏi Axit!`, "eq-success");
+                    log(`${metal.formula} + ${acid.formula} → Muối + H2 ↑`, "eq-success");
+                    createGas();
+                    liquid.style.background = "rgba(255,255,255,0.2)";
+                    reacted = true;
+                } else {
+                    log(`${metal.formula} đứng sau H, không thể tác dụng với ${acid.formula}.`, "eq-warning");
+                    reacted = true;
+                }
+            }
+
+            // TRƯỜNG HỢP 3: AXIT + BAZO (Trung hòa kinh điển)
+            if(!reacted && ((c1.data.type === "acid" && c2.data.type.includes("base")) || (c2.data.type === "acid" && c1.data.type.includes("base")))) {
+                log(`Phản ứng trung hòa Axit - Bazo sinh ra muối và nước.`, "eq-success");
+                log(`${c1.formula} + ${c2.formula} → Muối + H2O`, "eq-success");
+                liquid.style.background = "rgba(255,255,255,0.2)"; 
+                reacted = true;
+            }
+
+            // TRƯỜNG HỢP 4: MUỐI + MUỐI / MUỐI + BAZO (Tra bảng tính tan Ion)
+            if(!reacted && (c1.data.ions && c2.data.ions)) {
+                // Ghép chéo Ion: Ion+ của C1 với Ion- của C2 và ngược lại
+                let pair1 = `${c1.data.ions[0]}_${c2.data.ions[1]}`;
+                let pair2 = `${c2.data.ions[0]}_${c1.data.ions[1]}`;
+                
+                let ppt = precipitates[pair1] || precipitates[pair2];
+                if(ppt) {
+                    log(`Phản ứng trao đổi Ion tạo thành chất không tan!`, "eq-success");
+                    log(`${c1.formula} + ${c2.formula} → ${ppt.name} ↓ + Chất khác`, "eq-success");
+                    log(`>> Xuất hiện ${ppt.msg}`, "eq-warning");
+                    createPrecipitate(ppt.color);
+                    liquid.style.background = "rgba(255,255,255,0.1)"; // Nước trong lại để thấy kết tủa
+                    reacted = true;
+                }
+            }
+
+            // TRƯỜNG HỢP 5: MUỐI CACBONAT + AXIT (Sinh khí CO2)
+            if(!reacted && ((c1.data.ions && c1.data.ions[1]==="CO3" && c2.data.type==="acid") || (c2.data.ions && c2.data.ions[1]==="CO3" && c1.data.type==="acid"))) {
+                log(`Axit mạnh đẩy Axit yếu (H2CO3) ra khỏi muối, phân hủy thành khí!`, "eq-success");
+                log(`${c1.formula} + ${c2.formula} → Muối + CO2 ↑ + H2O`, "eq-success");
+                createGas();
+                reacted = true;
+            }
+
+            // TRƯỜNG HỢP 6: CHỈ THỊ MÀU
+            if(!reacted && (c1.data.type.includes("indicator") || c2.data.type.includes("indicator"))) {
+                let ind = c1.data.type.includes("indicator") ? c1 : c2;
+                let sub = c1.data.type.includes("indicator") ? c2 : c1;
+                
+                if(ind.formula === "Phenol" && sub.data.type === "base") {
+                    log(`Phenolphthalein hóa hồng sậm trong môi trường Kiềm!`, "eq-success");
+                    liquid.style.background = "rgba(255, 20, 147, 0.7)";
+                    reacted = true;
+                }
+                else if(ind.formula === "QuyTim") {
+                    if(sub.data.type === "acid") { 
+                        log(`Axit làm Quỳ tím hóa Đỏ!`, "eq-success"); 
+                        liquid.style.background = "rgba(255, 50, 50, 0.7)"; 
+                        reacted = true; 
+                    }
+                    if(sub.data.type === "base") { 
+                        log(`Bazo làm Quỳ tím hóa Xanh!`, "eq-success"); 
+                        liquid.style.background = "rgba(50, 50, 255, 0.7)"; 
+                        reacted = true; 
+                    }
+                    if(sub.data.type === "water" || sub.data.type === "salt") { 
+                        log(`Môi trường trung tính, Quỳ tím giữ nguyên màu tím.`, "eq-neutral"); 
+                        reacted = true; 
+                    }
+                }
+            }
+
+            // NẾU KHÔNG CÓ TRƯỜNG HỢP NÀO XẢY RA
+            if(!reacted) {
+                log(`Các chất trên không phản ứng với nhau. Dung dịch chứa hỗn hợp các Ion tự do.`, "eq-neutral");
+            }
+        }
+
+        // --- 6. HIỆU ỨNG DOM (VẬT LÝ VÀ HẠT) ---
+
+        // Hiệu ứng sinh khí (Bọt sủi lên)
+        function createGas() {
+            let liquid = document.getElementById('liquid');
+            for(let i=0; i<20; i++) {
+                let bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.left = Math.random() * 80 + 10 + '%'; // Vị trí ngẫu nhiên chiều ngang
+                bubble.style.width = bubble.style.height = (Math.random() * 8 + 4) + 'px'; // Kích thước ngẫu nhiên
+                bubble.style.bottom = (Math.random() * 20) + 'px';
+                bubble.style.animationDelay = (Math.random() * 1.5) + 's';
+                liquid.appendChild(bubble);
+            }
+        }
+
+        // Hiệu ứng kết tủa (Hạt rơi xuống)
+        function createPrecipitate(colorMap) {
+            let liquid = document.getElementById('liquid');
+            let colorHex = "#ffffff"; // Mặc định trắng
+            if(colorMap === "blue") colorHex = "#3b82f6"; // Xanh lam
+            if(colorMap === "yellow") colorHex = "#facc15"; // Vàng
+            
+            for(let i=0; i<50; i++) {
+                let p = document.createElement('div');
+                p.className = 'particle';
+                p.style.backgroundColor = colorHex;
+                p.style.left = Math.random() * 90 + 5 + '%';
+                p.style.top = Math.random() * 50 + '%';
+                p.style.animationDelay = (Math.random() * 2) + 's';
+                liquid.appendChild(p);
+            }
+        }
+
+        // Chạy hàm tạo giao diện ngay khi trang vừa load xong
+        window.onload = initUI;
+    </script>
+</body>
+</html>
